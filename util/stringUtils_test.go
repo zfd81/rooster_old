@@ -3,7 +3,23 @@ package util
 import "testing"
 
 func TestIndexOf(t *testing.T) {
-	str := "123456789"
-	t.Log(IndexOf(str, "1", 5))
-	t.Log(IndexOf(str, "3", 0))
+	type args struct {
+		str       string
+		substr    string
+		fromIndex int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IndexOf(tt.args.str, tt.args.substr, tt.args.fromIndex); got != tt.want {
+				t.Errorf("IndexOf() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
