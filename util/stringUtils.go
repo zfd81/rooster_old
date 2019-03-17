@@ -94,21 +94,20 @@ func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc
 	return buffer.String(), contents, nil
 }
 
-func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, []string, error) {
+func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, error) {
 	if str == "" {
-		return "", nil, nil
+		return "", nil
 	}
 	strLen := len(str)
 	index := 0
 	start := 0
 	end := 0
 	buffer := make([]byte, 0, strLen)
-	contents := make([]string, 0, 20)
 	for i := 0; i < strLen; i++ {
 		if str[i] == keyword {
 			//判断是否最后一位
 			if i+1 == strLen {
-				return "", nil, fmt.Errorf("Syntax error,near %d '%s'", i, str[i:])
+				return "", fmt.Errorf("Syntax error,near %d '%s'", i, str[i:])
 			}
 			index++
 			start = i + 1
@@ -122,10 +121,9 @@ func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, 
 					//判断最后一位
 					if i+1 == strLen {
 						content := str[start:]
-						contents = append(contents, content)
 						newContent, err := replacer(index, start, i, content)
 						if err != nil {
-							return "", nil, err
+							return "", err
 						}
 						buffer = append(buffer, []byte(newContent)...)
 					} else {
@@ -134,23 +132,22 @@ func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, 
 				} else {
 					if end > start {
 						content := str[start:i]
-						contents = append(contents, content)
 						newContent, err := replacer(index, start, end, content)
 						if err != nil {
-							return "", nil, err
+							return "", err
 						}
 						buffer = append(buffer, []byte(newContent)...)
 						start = 0
 						end = 0
 						buffer = append(buffer, str[i])
 					} else {
-						return "", nil, fmt.Errorf("Syntax error,near %d '%s'", start, str[start-1:])
+						return "", fmt.Errorf("Syntax error,near %d '%s'", start, str[start-1:])
 					}
 				}
 			}
 		}
 	}
-	return string(buffer), contents, nil
+	return string(buffer), nil
 }
 
 func IndexOf(str string, substr string, fromIndex int) int {
