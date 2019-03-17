@@ -94,6 +94,65 @@ func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc
 	return buffer.String(), contents, nil
 }
 
+func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, []string, error) {
+	if str == "" {
+		return "", nil, nil
+	}
+	strLen := len(str)
+	index := 0
+	start := 0
+	end := 0
+	buffer := make([]byte, 0, strLen)
+	contents := make([]string, 0, 20)
+	for i := 0; i < strLen; i++ {
+		if str[i] == keyword {
+			//判断是否最后一位
+			if i+1 == strLen {
+				return "", nil, fmt.Errorf("Syntax error,near %d '%s'", i, str[i:])
+			}
+			index++
+			start = i + 1
+			end = start
+		} else {
+			if start == 0 {
+				buffer = append(buffer, str[i])
+			} else {
+				char := str[i]
+				if (char >= 48 && char <= 57) || (char >= 65 && char <= 90) || (char >= 97 && char <= 122) || char == 95 {
+					//判断最后一位
+					if i+1 == strLen {
+						content := str[start:]
+						contents = append(contents, content)
+						newContent, err := replacer(index, start, i, content)
+						if err != nil {
+							return "", nil, err
+						}
+						buffer = append(buffer, []byte(newContent)...)
+					} else {
+						end = i
+					}
+				} else {
+					if end > start {
+						content := str[start:i]
+						contents = append(contents, content)
+						newContent, err := replacer(index, start, end, content)
+						if err != nil {
+							return "", nil, err
+						}
+						buffer = append(buffer, []byte(newContent)...)
+						start = 0
+						end = 0
+						buffer = append(buffer, str[i])
+					} else {
+						return "", nil, fmt.Errorf("Syntax error,near %d '%s'", start, str[start-1:])
+					}
+				}
+			}
+		}
+	}
+	return string(buffer), contents, nil
+}
+
 func IndexOf(str string, substr string, fromIndex int) int {
 	strLen := utf8.RuneCountInString(str)
 	if fromIndex >= strLen {
