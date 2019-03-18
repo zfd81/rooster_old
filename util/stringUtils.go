@@ -53,9 +53,9 @@ func Substr(str string, beginIndex int, endIndex int) (string, error) {
 	return string(strRune[beginIndex:endIndex]), nil
 }
 
-func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc) (string, []string, error) {
+func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc) (string, error) {
 	if str == "" {
-		return "", nil, nil
+		return "", nil
 	}
 	strLen := utf8.RuneCountInString(str)
 	openLen := len(open)
@@ -63,7 +63,6 @@ func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc
 	pos := 0
 	index := 0
 	var buffer bytes.Buffer
-	contents := make([]string, 0, 10)
 	for {
 		if pos < strLen-closeLen {
 			start := strings.Index(str[pos:], open)
@@ -78,11 +77,10 @@ func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc
 			end += start
 			buffer.WriteString(str[pos : start-openLen])
 			content := str[start:end]
-			contents = append(contents, content)
 			index++
 			newContent, err := replacer(index, start-openLen, end, content)
 			if err != nil {
-				return "", nil, err
+				return "", err
 			}
 			buffer.WriteString(newContent)
 			pos = end + closeLen
@@ -91,7 +89,7 @@ func ReplaceBetween(str string, open string, close string, replacer ReplacerFunc
 		}
 	}
 	buffer.WriteString(str[pos:])
-	return buffer.String(), contents, nil
+	return buffer.String(), nil
 }
 
 func ReplaceByKeyword(str string, keyword byte, replacer ReplacerFunc) (string, error) {
