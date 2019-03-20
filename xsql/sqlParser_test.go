@@ -9,7 +9,11 @@ func Test_bindMap(t *testing.T) {
 	countryCapitalMap := make(map[string]interface{})
 	countryCapitalMap["name"] = "Paris"
 	countryCapitalMap["pwd"] = "Rome"
-	str, params, err := bindMap(str, countryCapitalMap)
+	param := NewParam()
+	param.Add("name", "hello")
+	param.Add("pwd1", 123)
+	param1 := NewMapParam(countryCapitalMap)
+	str, params, err := bindMap(str, param1)
 	t.Log(str)
 	t.Log(params)
 	t.Log(err)
