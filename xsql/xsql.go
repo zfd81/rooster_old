@@ -2,6 +2,7 @@ package xsql
 
 import (
 	"database/sql"
+	"reflect"
 )
 
 type Paramer interface {
@@ -16,9 +17,12 @@ func NewParam() *MapParam {
 	return model
 }
 
-func NewMapParam(param map[string]interface{}) *MapParam {
+func NewMapParam(param map[string]interface{}) (*MapParam, error) {
+	if param == nil {
+		return nil, ErrParamNotNil
+	}
 	model := &MapParam{param}
-	return model
+	return model, nil
 }
 
 func (m *MapParam) Get(name string) (interface{}, bool) {
@@ -33,6 +37,32 @@ func (m *MapParam) Add(name string, value interface{}) *MapParam {
 	}
 	m.param[name] = value
 	return m
+}
+
+type StructParam struct {
+	param interface{}
+}
+
+func NewStructParam(param interface{}) (*StructParam, error) {
+	if param == nil {
+		return nil, ErrParamNotNil
+	}
+	typeOfParam := reflect.TypeOf(param)
+	if typeOfParam.Kind() != reflect.Struct {
+		if typeOfParam.Kind() != reflect.Ptr {
+			return nil, ErrParamType
+		} else {
+			if typeOfParam.Elem().Kind() != reflect.Struct {
+				return nil, ErrParamType
+			} else {
+				// if reflect.ValueOf(param).Elem() == nil {
+				// 	return nil, ErrParamNotNil
+				// }
+			}
+		}
+	}
+	model := &StructParam{param}
+	return model, nil
 }
 
 type DB struct {
