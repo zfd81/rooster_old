@@ -19,7 +19,7 @@ import (
 // 	return newSql, arglist, err
 // }
 
-func bindMap(sql string, arg Paramer) (string, []interface{}, error) {
+func bindParam(sql string, arg Paramer) (string, []interface{}, error) {
 	newSql, err := util.ReplaceBetween(sql, "{", "}", func(index int, start int, end int, content string) (string, error) {
 		ignore := false
 		fragment, err := util.ReplaceByKeyword(content, ':', func(i int, s int, e int, c string) (string, error) {
