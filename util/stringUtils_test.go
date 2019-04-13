@@ -27,6 +27,7 @@ func TestIndexOf(t *testing.T) {
 }
 
 func TestReplaceBetween(t *testing.T) {
+
 	str := "select name, age, sex from table where id=#id# and age>##"
 	var newStr string
 	for i := 0; i < 1000000; i++ {
