@@ -28,7 +28,7 @@ func TestIndexOf(t *testing.T) {
 
 func TestReplaceBetween(t *testing.T) {
 
-	str := "select name, age, sex from table where id=#id# and age>##"
+	str := "select name, age, sex from table where id=#id# and age>#aa#"
 	var newStr string
 	for i := 0; i < 1000000; i++ {
 		newStr, _ = ReplaceBetween(str, "#", "#", func(index int, start int, end int, content string) (string, error) {
