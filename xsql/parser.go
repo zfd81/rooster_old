@@ -1,8 +1,8 @@
 package xsql
 
 import (
+	"bytes"
 	"fmt"
-
 	"github.com/zfd81/rooster/util"
 )
 
@@ -48,4 +48,33 @@ func bindParam(sql string, arg Paramer) (string, []interface{}, error) {
 		return "?", nil
 	})
 	return newSql, params, err
+}
+
+func insertByMap(table string, object map[string]interface{}) (string, []interface{}, error) {
+	if table == "" || object == nil {
+		return "", nil, ErrParamNotNil
+	}
+	size := len(object)
+	if size < 1 {
+		return "", nil, ErrParamEmpty
+	}
+	var sql bytes.Buffer
+	var sql2 bytes.Buffer
+	sql.WriteString("insert into (")
+	sql2.WriteString(") values (")
+	params := make([]interface{}, 0, 20)
+	index := 0
+	for k, v := range object {
+		if index == 0 {
+			index++
+		} else {
+			sql.WriteString(",")
+			sql2.WriteString(",")
+		}
+		sql.WriteString(k)
+		sql2.WriteString("?")
+		params = append(params, v)
+	}
+	sql.WriteString(sql2.String())
+	return sql.String(), params, nil
 }
