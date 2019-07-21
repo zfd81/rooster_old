@@ -3,6 +3,7 @@ package xsql
 import (
 	"bytes"
 	"fmt"
+	"github.com/zfd81/rooster"
 	"github.com/zfd81/rooster/util"
 	"reflect"
 )
@@ -40,11 +41,11 @@ func bindParams(sql string, arg *Params) (string, []interface{}, error) {
 
 func insertByMap(table string, object map[string]interface{}) (string, []interface{}, error) {
 	if table == "" || object == nil {
-		return "", nil, ErrParamNotNil
+		return "", nil, rooster.ErrParamNotNil
 	}
 	size := len(object)
 	if size < 1 {
-		return "", nil, ErrParamEmpty
+		return "", nil, rooster.ErrParamEmpty
 	}
 	var sql bytes.Buffer
 	var sql2 bytes.Buffer
@@ -72,7 +73,7 @@ func insertByMap(table string, object map[string]interface{}) (string, []interfa
 
 func insertByStruct(table string, object interface{}) (string, []interface{}, error) {
 	if table == "" || object == nil {
-		return "", nil, ErrParamNotNil
+		return "", nil, rooster.ErrParamNotNil
 	}
 	typeOfObject := reflect.TypeOf(object)
 	valueOfObject := reflect.ValueOf(object)
@@ -81,7 +82,7 @@ func insertByStruct(table string, object interface{}) (string, []interface{}, er
 		valueOfObject = valueOfObject.Elem()
 	}
 	if valueOfObject.Kind() != reflect.Struct || !valueOfObject.IsValid() {
-		return "", nil, ErrParamType
+		return "", nil, rooster.ErrParamType
 	}
 	var sql bytes.Buffer
 	var sql2 bytes.Buffer

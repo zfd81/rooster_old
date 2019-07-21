@@ -1,6 +1,7 @@
 package xsql
 
 import (
+	"github.com/zfd81/rooster"
 	"reflect"
 	"strings"
 )
@@ -48,11 +49,11 @@ func NewParams() *Params {
 
 func NewMapParams(params map[string]interface{}) (*Params, error) {
 	if params == nil {
-		return nil, ErrParamNotNil
+		return nil, rooster.ErrParamNotNil
 	}
 	size := len(params)
 	if size < 1 {
-		return nil, ErrParamEmpty
+		return nil, rooster.ErrParamEmpty
 	}
 	var model Params
 	if ignoreCase {
@@ -69,7 +70,7 @@ func NewMapParams(params map[string]interface{}) (*Params, error) {
 
 func NewStructParams(params interface{}) (*Params, error) {
 	if params == nil {
-		return nil, ErrParamNotNil
+		return nil, rooster.ErrParamNotNil
 	}
 	typeOfParams := reflect.TypeOf(params)
 	valueOfParams := reflect.ValueOf(params)
@@ -78,7 +79,7 @@ func NewStructParams(params interface{}) (*Params, error) {
 		valueOfParams = valueOfParams.Elem()
 	}
 	if valueOfParams.Kind() != reflect.Struct || !valueOfParams.IsValid() {
-		return nil, ErrParamType
+		return nil, rooster.ErrParamType
 	}
 	newParams := make(map[string]interface{})
 	if ignoreCase {
@@ -108,7 +109,7 @@ func NewParam() *MapParam {
 
 func NewMapParam(param map[string]interface{}) (*MapParam, error) {
 	if param == nil {
-		return nil, ErrParamNotNil
+		return nil, rooster.ErrParamNotNil
 	}
 	newParam := make(map[string]interface{})
 	for k, v := range param {
@@ -141,7 +142,7 @@ type StructParam struct {
 
 func NewStructParam(param interface{}) (*StructParam, error) {
 	if param == nil {
-		return nil, ErrParamNotNil
+		return nil, rooster.ErrParamNotNil
 	}
 	typeOfParam := reflect.TypeOf(param)
 	valueOfParam := reflect.ValueOf(param)
@@ -150,7 +151,7 @@ func NewStructParam(param interface{}) (*StructParam, error) {
 		valueOfParam = valueOfParam.Elem()
 	}
 	if valueOfParam.Kind() != reflect.Struct || !valueOfParam.IsValid() {
-		return nil, ErrParamType
+		return nil, rooster.ErrParamType
 	}
 	fieldNum := typeOfParam.NumField()
 	fieldIndexMap := make(map[string]int)
