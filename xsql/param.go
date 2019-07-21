@@ -5,6 +5,95 @@ import (
 	"strings"
 )
 
+//忽略列名大小写
+var ignoreCase bool = true
+
+func setIgnoreCase(ignore bool) {
+	ignoreCase = ignore
+}
+
+type Params struct {
+	params map[string]interface{}
+}
+
+func (p *Params) Get(name string) (interface{}, bool) {
+	var (
+		val interface{}
+		ok  bool
+	)
+	if ignoreCase {
+		val, ok = p.params[strings.ToLower(name)]
+	} else {
+		val, ok = p.params[name]
+	}
+	return val, ok
+}
+
+func (p *Params) Add(name string, value interface{}) *Params {
+	if ignoreCase {
+		name = strings.ToLower(name)
+	}
+	_, ok := p.params[name]
+	if ok {
+		delete(p.params, name)
+	}
+	p.params[name] = value
+	return p
+}
+
+func NewParams() *Params {
+	model := &Params{make(map[string]interface{})}
+	return model
+}
+
+func NewMapParams(params map[string]interface{}) (*Params, error) {
+	if params == nil {
+		return nil, ErrParamNotNil
+	}
+	size := len(params)
+	if size < 1 {
+		return nil, ErrParamEmpty
+	}
+	var model Params
+	if ignoreCase {
+		newParams := make(map[string]interface{})
+		for k, v := range params {
+			newParams[strings.ToLower(k)] = v
+		}
+		model.params = newParams
+	} else {
+		model.params = params
+	}
+	return &model, nil
+}
+
+func NewStructParams(params interface{}) (*Params, error) {
+	if params == nil {
+		return nil, ErrParamNotNil
+	}
+	typeOfParams := reflect.TypeOf(params)
+	valueOfParams := reflect.ValueOf(params)
+	if valueOfParams.Kind() == reflect.Ptr {
+		typeOfParams = typeOfParams.Elem()
+		valueOfParams = valueOfParams.Elem()
+	}
+	if valueOfParams.Kind() != reflect.Struct || !valueOfParams.IsValid() {
+		return nil, ErrParamType
+	}
+	newParams := make(map[string]interface{})
+	if ignoreCase {
+		for i := 0; i < valueOfParams.NumField(); i++ {
+			newParams[strings.ToLower(typeOfParams.Field(i).Name)] = valueOfParams.Field(i).Interface()
+		}
+	} else {
+		for i := 0; i < valueOfParams.NumField(); i++ {
+			newParams[typeOfParams.Field(i).Name] = valueOfParams.Field(i).Interface()
+		}
+	}
+	model := &Params{newParams}
+	return model, nil
+}
+
 type Paramer interface {
 	Get(name string) (interface{}, bool)
 }

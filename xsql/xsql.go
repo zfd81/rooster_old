@@ -18,23 +18,23 @@ func Open(driverName, dataSourceName string) (*DB, error) {
 	return &DB{DB: db, driverName: driverName}, err
 }
 
-func (db *DB) XExec(query string, param Paramer) (int64, error) {
-	sql, args, err := bindParam(query, param)
-	if err != nil {
-		return -1, err
-	}
-	stmt, err := db.Prepare(sql)
-	defer stmt.Close()
-	if err != nil {
-		return -1, err
-	}
-	res, err := stmt.Exec(args...)
-	if err != nil {
-		return -1, err
-	}
-	num, err := res.RowsAffected()
-	return num, err
-}
+//func (db *DB) XExec(query string, param Paramer) (int64, error) {
+//	sql, args, err := bindParams(query, param)
+//	if err != nil {
+//		return -1, err
+//	}
+//	stmt, err := db.Prepare(sql)
+//	defer stmt.Close()
+//	if err != nil {
+//		return -1, err
+//	}
+//	res, err := stmt.Exec(args...)
+//	if err != nil {
+//		return -1, err
+//	}
+//	num, err := res.RowsAffected()
+//	return num, err
+//}
 
 // func (db *DB) Execute(query string, arg interface{}) (sql.Result, error) {
 // 	var sql string
