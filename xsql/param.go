@@ -18,15 +18,10 @@ type Params struct {
 }
 
 func (p *Params) Get(name string) (interface{}, bool) {
-	var (
-		val interface{}
-		ok  bool
-	)
 	if ignoreCase {
-		val, ok = p.params[strings.ToLower(name)]
-	} else {
-		val, ok = p.params[name]
+		name = strings.ToLower(name)
 	}
+	val, ok := p.params[name]
 	return val, ok
 }
 
