@@ -30,6 +30,20 @@ func (p *Params) Remove(name string) *Params {
 	}
 	return p
 }
+func (p *Params) Names() []string {
+	if len(p.params) < 1 {
+		return nil
+	}
+	names := make([]string, 5, 10)
+	for k := range p.params {
+		names = append(names, k)
+	}
+	return names
+}
+
+func (p *Params) Size(name string) int {
+	return len(p.params)
+}
 
 func NewParams() *Params {
 	model := &Params{make(map[string]interface{})}
