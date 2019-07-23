@@ -35,6 +35,9 @@ func Test_bindParams(t *testing.T) {
 	t.Log(str)
 	t.Log(params)
 	t.Log(err)
+	t.Log(param.Size())
+	t.Log(param.Names())
+	t.Log(len(param.Names()))
 }
 
 func Test_insertByMap(t *testing.T) {
