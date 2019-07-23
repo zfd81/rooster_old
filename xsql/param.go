@@ -50,7 +50,7 @@ func NewMapParams(params map[string]interface{}) (*Params, error) {
 	if size < 1 {
 		return nil, rooster.ErrParamEmpty
 	}
-	var model Params
+	model := &Params{}
 	if ignoreCase {
 		newParams := make(map[string]interface{})
 		for k, v := range params {
@@ -60,7 +60,7 @@ func NewMapParams(params map[string]interface{}) (*Params, error) {
 	} else {
 		model.params = params
 	}
-	return &model, nil
+	return model, nil
 }
 
 func NewStructParams(params interface{}) (*Params, error) {
