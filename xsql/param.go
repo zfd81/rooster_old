@@ -1,8 +1,7 @@
 package xsql
 
 import (
-	"github.com/zfd81/rooster"
-	"reflect"
+	"github.com/zfd81/rooster/util"
 )
 
 type Params struct {
@@ -46,38 +45,34 @@ func (p *Params) Size() int {
 	return len(p.params)
 }
 
+func (p *Params) Iterator(handler func(key string, value interface{})) {
+	if len(p.params) < 1 {
+		return
+	}
+	for k, v := range p.params {
+		handler(k, v)
+	}
+}
+
 func NewParams() *Params {
 	model := &Params{make(map[string]interface{})}
 	return model
 }
 
-func NewMapParams(params map[string]interface{}) (*Params, error) {
-	if params == nil {
-		return nil, rooster.ErrParamNotNil
+func NewMapParams(params map[string]interface{}) *Params {
+	if params == nil || len(params) < 1 {
+		return &Params{make(map[string]interface{})}
 	}
-	size := len(params)
-	if size < 1 {
-		return nil, rooster.ErrParamEmpty
-	}
-	return &Params{params}, nil
+	return &Params{params}
 }
 
-func NewStructParams(params interface{}) (*Params, error) {
-	if params == nil {
-		return nil, rooster.ErrParamNotNil
-	}
-	typeOfParams := reflect.TypeOf(params)
-	valueOfParams := reflect.ValueOf(params)
-	if valueOfParams.Kind() == reflect.Ptr {
-		typeOfParams = typeOfParams.Elem()
-		valueOfParams = valueOfParams.Elem()
-	}
-	if valueOfParams.Kind() != reflect.Struct || !valueOfParams.IsValid() {
-		return nil, rooster.ErrParamType
-	}
+func NewStructParams(params interface{}) *Params {
 	newParams := make(map[string]interface{})
-	for i := 0; i < valueOfParams.NumField(); i++ {
-		newParams[typeOfParams.Field(i).Name] = valueOfParams.Field(i).Interface()
+	err := util.StructIterator(params, func(index int, key string, value interface{}) {
+		newParams[key] = value
+	})
+	if err != nil {
+		return &Params{make(map[string]interface{})}
 	}
-	return &Params{newParams}, nil
+	return &Params{newParams}
 }
