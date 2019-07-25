@@ -4,75 +4,80 @@ import (
 	"github.com/zfd81/rooster/util"
 )
 
-type Params struct {
-	params map[string]interface{}
-}
+type Params map[string]interface{}
 
-func (p *Params) Get(name string) (interface{}, bool) {
-	val, ok := p.params[name]
+func (p Params) Get(name string) (interface{}, bool) {
+	val, ok := p[name]
 	return val, ok
 }
 
-func (p *Params) Add(name string, value interface{}) *Params {
-	_, ok := p.params[name]
+func (p Params) Add(name string, value interface{}) Params {
+	_, ok := p[name]
 	if ok {
-		delete(p.params, name)
+		delete(p, name)
 	}
-	p.params[name] = value
+	p[name] = value
 	return p
 }
 
-func (p *Params) Remove(name string) *Params {
-	_, ok := p.params[name]
+func (p Params) Remove(name string) Params {
+	_, ok := p[name]
 	if ok {
-		delete(p.params, name)
+		delete(p, name)
 	}
 	return p
 }
 
-func (p *Params) Names() []string {
-	if len(p.params) < 1 {
+func (p Params) Names() []string {
+	if len(p) < 1 {
 		return nil
 	}
 	names := make([]string, 0, 10)
-	for k := range p.params {
+	for k := range p {
 		names = append(names, k)
 	}
 	return names
 }
 
-func (p *Params) Size() int {
-	return len(p.params)
+func (p Params) Size() int {
+	return len(p)
 }
 
-func (p *Params) Iterator(handler func(key string, value interface{})) {
-	if len(p.params) < 1 {
+func (p Params) Iterator(handler func(key string, value interface{})) {
+	if len(p) < 1 {
 		return
 	}
-	for k, v := range p.params {
+	for k, v := range p {
 		handler(k, v)
 	}
 }
 
-func NewParams() *Params {
-	model := &Params{make(map[string]interface{})}
-	return model
-}
-
-func NewMapParams(params map[string]interface{}) *Params {
-	if params == nil || len(params) < 1 {
-		return &Params{make(map[string]interface{})}
+func (p Params) Clone() Params {
+	p2 := make(Params, len(p))
+	for k, v := range p {
+		p2[k] = v
 	}
-	return &Params{params}
+	return p2
 }
 
-func NewStructParams(params interface{}) *Params {
+func NewParams() Params {
+	return make(Params)
+}
+
+func NewMapParams(params map[string]interface{}) Params {
+	if params == nil || len(params) < 1 {
+		return make(Params)
+	}
+	return params
+}
+
+func NewStructParams(params interface{}) Params {
 	newParams := make(map[string]interface{})
 	err := util.StructIterator(params, func(index int, key string, value interface{}) {
 		newParams[key] = value
 	})
 	if err != nil {
-		return &Params{make(map[string]interface{})}
+		return make(Params)
 	}
-	return &Params{newParams}
+	return newParams
 }
