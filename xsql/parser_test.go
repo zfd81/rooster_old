@@ -55,7 +55,7 @@ func Test_insert(t *testing.T) {
 	countryCapitalMap["NAME"] = "Paris"
 	countryCapitalMap["pwd"] = "Rome"
 	param := NewMapParams(countryCapitalMap)
-	str, params, err = insert("aaa", param)
+	str, params, err = insert("UserInfo2", param)
 	t.Log(str)
 	t.Log(params)
 	t.Log(err)
