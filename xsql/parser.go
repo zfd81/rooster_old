@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/zfd81/rooster"
 	"github.com/zfd81/rooster/util"
-	"reflect"
 )
 
 func bindParams(sql string, arg *Params) (string, []interface{}, error) {
@@ -39,12 +38,11 @@ func bindParams(sql string, arg *Params) (string, []interface{}, error) {
 	return newSql, params, err
 }
 
-func insertByMap(table string, object map[string]interface{}) (string, []interface{}, error) {
-	if table == "" || object == nil {
+func insert(table string, arg *Params) (string, []interface{}, error) {
+	if table == "" || arg == nil {
 		return "", nil, rooster.ErrParamNotNil
 	}
-	size := len(object)
-	if size < 1 {
+	if arg.Size() < 1 {
 		return "", nil, rooster.ErrParamEmpty
 	}
 	var sql bytes.Buffer
@@ -55,51 +53,17 @@ func insertByMap(table string, object map[string]interface{}) (string, []interfa
 	sql2.WriteString(") values (")
 	params := make([]interface{}, 0, 20)
 	index := 0
-	for k, v := range object {
+	arg.Iterator(func(key string, value interface{}) {
 		if index == 0 {
 			index++
 		} else {
 			sql.WriteString(",")
 			sql2.WriteString(",")
 		}
-		sql.WriteString(k)
+		sql.WriteString(string(key))
 		sql2.WriteString("?")
-		params = append(params, v)
-	}
-	sql.WriteString(sql2.String())
-	sql.WriteString(")")
-	return sql.String(), params, nil
-}
-
-func insertByStruct(table string, object interface{}) (string, []interface{}, error) {
-	if table == "" || object == nil {
-		return "", nil, rooster.ErrParamNotNil
-	}
-	typeOfObject := reflect.TypeOf(object)
-	valueOfObject := reflect.ValueOf(object)
-	if valueOfObject.Kind() == reflect.Ptr {
-		typeOfObject = typeOfObject.Elem()
-		valueOfObject = valueOfObject.Elem()
-	}
-	if valueOfObject.Kind() != reflect.Struct || !valueOfObject.IsValid() {
-		return "", nil, rooster.ErrParamType
-	}
-	var sql bytes.Buffer
-	var sql2 bytes.Buffer
-	sql.WriteString("insert into ")
-	sql.WriteString(table)
-	sql.WriteString(" (")
-	sql2.WriteString(") values (")
-	params := make([]interface{}, 0, 20)
-	for i := 0; i < valueOfObject.NumField(); i++ {
-		if i > 0 {
-			sql.WriteString(",")
-			sql2.WriteString(",")
-		}
-		sql.WriteString(typeOfObject.Field(i).Name)
-		sql2.WriteString("?")
-		params = append(params, valueOfObject.Field(i).Interface())
-	}
+		params = append(params, value)
+	})
 	sql.WriteString(sql2.String())
 	sql.WriteString(")")
 	return sql.String(), params, nil

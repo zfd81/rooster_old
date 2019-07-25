@@ -1,7 +1,6 @@
 package xsql
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -30,7 +29,7 @@ func Test_bindParams(t *testing.T) {
 	//t.Log(err)
 
 	user := &User{"zfd", "456"}
-	param, err := NewStructParams(user)
+	param := NewStructParams(user)
 	str, params, err := bindParams(str, param)
 	t.Log(str)
 	t.Log(params)
@@ -40,31 +39,24 @@ func Test_bindParams(t *testing.T) {
 	t.Log(len(param.Names()))
 }
 
-func Test_insertByMap(t *testing.T) {
-	countryCapitalMap := make(map[string]interface{})
-	countryCapitalMap["NAME"] = "Paris"
-	countryCapitalMap["pwd"] = "Rome"
-	str, params, err := insertByMap("aaa", countryCapitalMap)
-	t.Log(str)
-	t.Log(params)
-	t.Log(err)
-}
-
-func Test_insertByStruct(t *testing.T) {
+func Test_insert(t *testing.T) {
 	type User struct {
 		Name string
 		Pwd  string
 	}
-	pa1 := &User{"zfd", "4568"}
-	var p User
-	//p.Name = ""
-	//p.Pwd = ""
-	//str, params, err := insertByStruct("aaa", p)
-	//t.Log(str)
-	//t.Log(len(params))
-	//t.Log(err)
+	user := &User{"zfd", "4568"}
+	str, params, err := insert("userInfo", NewStructParams(user))
+	t.Log(str)
+	t.Log(params)
+	t.Log(len(params))
+	t.Log(err)
+
 	countryCapitalMap := make(map[string]interface{})
-	t.Log(reflect.ValueOf(p).Kind())
-	t.Log(reflect.ValueOf(pa1).Kind())
-	t.Log(reflect.ValueOf(countryCapitalMap).Kind())
+	countryCapitalMap["NAME"] = "Paris"
+	countryCapitalMap["pwd"] = "Rome"
+	param := NewMapParams(countryCapitalMap)
+	str, params, err = insert("aaa", param)
+	t.Log(str)
+	t.Log(params)
+	t.Log(err)
 }
