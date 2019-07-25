@@ -73,11 +73,8 @@ func NewMapParams(params map[string]interface{}) Params {
 
 func NewStructParams(params interface{}) Params {
 	newParams := make(map[string]interface{})
-	err := util.StructIterator(params, func(index int, key string, value interface{}) {
+	util.StructIterator(params, func(index int, key string, value interface{}) {
 		newParams[key] = value
 	})
-	if err != nil {
-		return make(Params)
-	}
 	return newParams
 }
