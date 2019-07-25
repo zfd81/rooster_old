@@ -7,7 +7,7 @@ import (
 	"github.com/zfd81/rooster/util"
 )
 
-func bindParams(sql string, arg *Params) (string, []interface{}, error) {
+func bindParams(sql string, arg Params) (string, []interface{}, error) {
 	newSql, err := util.ReplaceBetween(sql, "{", "}", func(index int, start int, end int, content string) (string, error) {
 		ignore := false
 		fragment, err := util.ReplaceByKeyword(content, ':', func(i int, s int, e int, c string) (string, error) {
@@ -38,7 +38,7 @@ func bindParams(sql string, arg *Params) (string, []interface{}, error) {
 	return newSql, params, err
 }
 
-func insert(table string, arg *Params) (string, []interface{}, error) {
+func insert(table string, arg Params) (string, []interface{}, error) {
 	if table == "" || arg == nil {
 		return "", nil, rooster.ErrParamNotNil
 	}
