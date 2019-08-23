@@ -26,7 +26,8 @@ func TestEqual(t *testing.T) {
 	t.Log(Equal(b1, b3))
 	t.Log("==========比较字符串")
 	t.Log(Equal(b1, b2)())
-	t.Log(Equal(b1, b3)())
+	fun := Equal(b1, b3)
+	t.Log(fun.Filter())
 	t.Log("==========比较整数")
 	t.Log(Equal(b4, b5)())
 	t.Log(Equal(b4, b6)())
@@ -90,4 +91,13 @@ func TestHasSuffix(t *testing.T) {
 	t.Log(HasSuffix(b1, []byte("ab"))())
 	t.Log(HasSuffix(b1, []byte("bc"))())
 	t.Log(HasSuffix(b1, []byte("c"))())
+}
+
+func TestAND(t *testing.T) {
+	t.Log(AND(HasSuffix(b1, []byte("c")), HasSuffix(b1, []byte("abc")), HasSuffix(b1, []byte("bc")))())
+}
+
+func TestOR(t *testing.T) {
+	fun := OR(HasSuffix(b1, []byte("a")), HasSuffix(b1, []byte("abc")), HasSuffix(b1, []byte("bc")))
+	t.Log(fun())
 }

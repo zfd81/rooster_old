@@ -11,11 +11,22 @@ const (
 
 type FilterFunc func() bool
 
+func (f *FilterFunc) Filter() bool {
+	return (*f)()
+}
+
 type FilterChain []FilterFunc
 
 func (fc *FilterChain) Add(filter FilterFunc) *FilterChain {
-	if fc != nil {
+	if filter != nil {
 		*fc = append(*fc, filter)
+	}
+	return fc
+}
+
+func (fc *FilterChain) OR(filters ...FilterFunc) *FilterChain {
+	if filters != nil {
+		*fc = append(*fc, OR(filters...))
 	}
 	return fc
 }
@@ -23,6 +34,18 @@ func (fc *FilterChain) Add(filter FilterFunc) *FilterChain {
 func (fc *FilterChain) Clear() *FilterChain {
 	*fc = (*fc)[0:0]
 	return fc
+}
+
+func (fc *FilterChain) Filter() bool {
+	flag := true
+	for _, filter := range *fc {
+		if !filter() {
+			flag = false
+			break
+		}
+	}
+	*fc = (*fc)[0:0]
+	return flag
 }
 
 func NewFilterChain() *FilterChain {
