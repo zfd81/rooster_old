@@ -1,6 +1,8 @@
 package store
 
-import "encoding/binary"
+import (
+	"strconv"
+)
 
 type Field []byte
 
@@ -20,8 +22,13 @@ func (f *Field) ToString() string {
 	return string(*f)
 }
 
-func (f *Field) ToInt() int64 {
-	return int64(binary.BigEndian.Uint64(*f))
+func (f *Field) ToInt() int {
+	//return int64(binary.BigEndian.Uint64(*f))
+	val, err := strconv.Atoi(string(*f))
+	if err != nil {
+		return 0
+	}
+	return val
 }
 
 func NewField(bytes []byte) Field {

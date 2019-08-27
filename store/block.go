@@ -4,56 +4,58 @@ const (
 	defaultBlockCapacity = 64 * 1024
 )
 
-type Block []Row
+type Block struct {
+	Name  string
+	lines []Line
+}
 
-func (b *Block) Add(row Row) *Block {
-	if row != nil {
-		*b = append(*b, row)
+func (b *Block) Add(line Line) *Block {
+	if line != nil {
+		b.lines = append(b.lines, line)
 	}
 	return b
 }
 
-func (b *Block) AddBatch(rows []Row) *Block {
-	if rows != nil {
-		*b = append(*b, rows...)
+func (b *Block) AddBatch(lines []Line) *Block {
+	if lines != nil {
+		b.lines = append(b.lines, lines...)
 	}
 	return b
 }
 
 func (b *Block) Remove(index int) *Block {
-	*b = append((*b)[:index], (*b)[index+1:]...)
+	b.lines = append(b.lines[:index], b.lines[index+1:]...)
 	return b
 }
 
-func (b *Block) GetRow(index int) *Row {
-	return &(*b)[index]
+func (b *Block) GetLine(index int) *Line {
+	return &b.lines[index]
 }
 
-func (b *Block) SetRow(index int, row Row) {
-	(*b)[index] = row
+func (b *Block) SetLine(index int, line Line) {
+	b.lines[index] = line
 }
 
-func (b *Block) GetRowField(rindex int, findex int) *Field {
-	return &(*b)[rindex][findex]
+func (b *Block) GetField(lindex int, findex int) *Field {
+	return &b.lines[lindex][findex]
 }
 
-func (b *Block) SetRowField(rindex int, findex int, field Field) {
-	(*b)[rindex][findex] = field
+func (b *Block) SetField(lindex int, findex int, field Field) {
+	b.lines[lindex][findex] = field
 }
 
 func (b *Block) Length() int {
-	return len(*b)
+	return len(b.lines)
 }
 
 func (b *Block) Size() int {
 	size := 0
-	for _, row := range *b {
-		size = size + row.Size()
+	for _, line := range b.lines {
+		size = size + line.Size()
 	}
 	return size
 }
 
-func NewBlock() *Block {
-	var block Block = make([]Row, 0, defaultBlockCapacity)
-	return &block
+func NewBlock(name string) *Block {
+	return &Block{name, make([]Line, 0, defaultBlockCapacity)}
 }

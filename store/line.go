@@ -9,59 +9,59 @@ const (
 	defaultRowCapacity = 256
 )
 
-type Row []Field
+type Line []Field
 
-func (r *Row) Set(bytes []byte, args ...byte) {
+func (l *Line) Set(bytes []byte, args ...byte) {
 	if bytes != nil {
-		*r = bytes2Fields(bytes, args...)
+		*l = bytes2Fields(bytes, args...)
 	}
 }
 
-func (r *Row) Add(field Field) *Row {
+func (l *Line) Add(field Field) *Line {
 	if field != nil {
-		*r = append(*r, field)
+		*l = append(*l, field)
 	}
-	return r
+	return l
 }
 
-func (r *Row) GetField(index int) *Field {
-	return &(*r)[index]
+func (l *Line) GetField(index int) *Field {
+	return &(*l)[index]
 }
 
-func (r *Row) SetField(index int, field Field) {
-	(*r)[index] = field
+func (l *Line) SetField(index int, field Field) {
+	(*l)[index] = field
 }
 
-func (r *Row) Length() int {
-	return len(*r)
+func (l *Line) Length() int {
+	return len(*l)
 }
 
-func (r *Row) Size() int {
+func (l *Line) Size() int {
 	size := 0
-	for _, field := range *r {
+	for _, field := range *l {
 		size = size + field.Size()
 	}
 	return size
 }
 
-func NewRow() *Row {
+func NewRow() *Line {
 	return NewRowByCapacity(defaultRowCapacity)
 }
 
-func NewRowByCapacity(cap int) *Row {
-	var row Row = make([]Field, 0, cap)
-	return &row
+func NewRowByCapacity(cap int) *Line {
+	var line Line = make([]Field, 0, cap)
+	return &line
 }
 
-func NewRowByFields(fields []Field) *Row {
+func NewRowByFields(fields []Field) *Line {
 	if fields == nil {
 		return NewRow()
 	}
-	var row Row = fields
-	return &row
+	var line Line = fields
+	return &line
 }
 
-func NewRowByBytes(bytes []byte, args ...byte) *Row {
+func NewRowByBytes(bytes []byte, args ...byte) *Line {
 	if bytes == nil {
 		return NewRow()
 	}

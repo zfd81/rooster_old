@@ -6,42 +6,8 @@ import (
 	"strconv"
 )
 
-type Context struct {
-	env []Variable
-	row *store.Row
-}
-
-//func (c *Context) Add(val Variable) int {
-//	index := len(c.env)
-//	val.Index = index
-//	c.env = append(c.env, val)
-//	return index
-//}
-
-func (c *Context) SetRow(row *store.Row) *Context {
-	if row != nil {
-		c.row = row
-	}
-	return c
-}
-
-//func (c *Context) Get(param *Parameter) []byte {
-//	if param != nil {
-//		if param.Type == types.Field {
-//			return *c.row.GetField(param.Index)
-//		} else if param.Type == types.Variable {
-//			return c.env[param.Index].Value
-//		}
-//	}
-//	return nil
-//}
-
-func NewContext() *Context {
-	return &Context{env: make([]Variable, 0, 20)}
-}
-
 type Parameter interface {
-	Val(row *store.Row) []byte
+	Val(row *store.Line) []byte
 }
 
 type Constant struct {
@@ -49,17 +15,8 @@ type Constant struct {
 	value []byte
 }
 
-func (c *Constant) Val(row *store.Row) []byte {
+func (c *Constant) Val(row *store.Line) []byte {
 	return c.value
-}
-
-type Variable struct {
-	Type  types.ParamType
-	index int
-}
-
-func (v *Variable) Val(row *store.Row) []byte {
-	return *row.GetField(v.index)
 }
 
 func NewConst(val interface{}) *Constant {
@@ -75,6 +32,15 @@ func NewConst(val interface{}) *Constant {
 	default:
 		return &Constant{types.Constant, nil}
 	}
+}
+
+type Variable struct {
+	Type  types.ParamType
+	index int
+}
+
+func (v *Variable) Val(row *store.Line) []byte {
+	return *row.GetField(v.index)
 }
 
 func NewVar(index int) *Variable {
