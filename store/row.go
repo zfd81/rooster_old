@@ -68,9 +68,9 @@ func NewRowByBytes(bytes []byte, args ...byte) *Row {
 	return NewRowByFields(bytes2Fields(bytes, args...))
 }
 
-func bytes2Fields(data []byte, args ...byte) []Field {
+func bytes2Fields(data []byte, split ...byte) []Field {
 	if data != nil {
-		if len(args) == 0 {
+		if len(split) == 0 {
 			return []Field{NewField(data)}
 		} else {
 			scanner := bufio.NewScanner(bytes.NewReader(data))
@@ -79,7 +79,7 @@ func bytes2Fields(data []byte, args ...byte) []Field {
 				if atEOF && len(data) == 0 {
 					return 0, nil, nil
 				}
-				if i := bytes.IndexByte(data, args[0]); i >= 0 {
+				if i := bytes.IndexByte(data, split[0]); i >= 0 {
 					return i + 1, data[0:i], nil
 				}
 				if atEOF {

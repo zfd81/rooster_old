@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"github.com/zfd81/rooster/store"
 	"github.com/zfd81/rooster/util"
 )
 
@@ -9,22 +10,22 @@ const (
 	defaultFilterChainCapacity = 128
 )
 
-type FilterFunc func() bool
+type FilterFunc func(row *store.Row) bool
 
-func (f *FilterFunc) Filter() bool {
-	return (*f)()
+func (f *FilterFunc) Filter(row *store.Row) bool {
+	return (*f)(row)
 }
 
 type FilterChain []FilterFunc
 
-func (fc *FilterChain) Add(filter FilterFunc) *FilterChain {
+func (fc *FilterChain) Add(filter ...FilterFunc) *FilterChain {
 	if filter != nil {
-		*fc = append(*fc, filter)
+		*fc = append(*fc, filter...)
 	}
 	return fc
 }
 
-func (fc *FilterChain) OR(filters ...FilterFunc) *FilterChain {
+func (fc *FilterChain) AddOR(filters ...FilterFunc) *FilterChain {
 	if filters != nil {
 		*fc = append(*fc, OR(filters...))
 	}
@@ -36,16 +37,13 @@ func (fc *FilterChain) Clear() *FilterChain {
 	return fc
 }
 
-func (fc *FilterChain) Filter() bool {
-	flag := true
+func (fc *FilterChain) Filter(row *store.Row) bool {
 	for _, filter := range *fc {
-		if !filter() {
-			flag = false
-			break
+		if !filter(row) {
+			return false
 		}
 	}
-	*fc = (*fc)[0:0]
-	return flag
+	return true
 }
 
 func NewFilterChain() *FilterChain {
@@ -54,9 +52,9 @@ func NewFilterChain() *FilterChain {
 }
 
 func AND(filters ...FilterFunc) FilterFunc {
-	return func() bool {
+	return func(row *store.Row) bool {
 		for _, v := range filters {
-			if !v() {
+			if !v(row) {
 				return false
 			}
 		}
@@ -65,9 +63,9 @@ func AND(filters ...FilterFunc) FilterFunc {
 }
 
 func OR(filters ...FilterFunc) FilterFunc {
-	return func() bool {
+	return func(row *store.Row) bool {
 		for _, v := range filters {
-			if v() {
+			if v(row) {
 				return true
 			}
 		}
@@ -75,74 +73,74 @@ func OR(filters ...FilterFunc) FilterFunc {
 	}
 }
 
-func Equal(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.Equal(a, b)
+func Equal(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.Equal(a.Val(row), b.Val(row))
 	}
 }
 
-func NotEqual(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.NotEqual(a, b)
+func NotEqual(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.NotEqual(a.Val(row), b.Val(row))
 	}
 }
 
-func Greater(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.Greater(a, b)
+func Greater(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.Greater(a.Val(row), b.Val(row))
 	}
 }
 
-func GreaterOrEqual(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.GreaterOrEqual(a, b)
+func GreaterOrEqual(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.GreaterOrEqual(a.Val(row), b.Val(row))
 	}
 }
 
-func Less(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.Less(a, b)
+func Less(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.Less(a.Val(row), b.Val(row))
 	}
 }
 
-func LessOrEqual(a, b []byte) FilterFunc {
-	return func() bool {
-		return util.LessOrEqual(a, b)
+func LessOrEqual(a, b Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.LessOrEqual(a.Val(row), b.Val(row))
 	}
 }
 
-func In(a []byte, b [][]byte) FilterFunc {
-	return func() bool {
-		return util.In(a, b)
+func In(a Parameter, b [][]byte) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.In(a.Val(row), b)
 	}
 }
 
-func NotIn(a []byte, b [][]byte) FilterFunc {
-	return func() bool {
-		return util.NotIn(a, b)
+func NotIn(a Parameter, b [][]byte) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.NotIn(a.Val(row), b)
 	}
 }
 
-func Empty(val []byte) FilterFunc {
-	return func() bool {
-		return util.Empty(val)
+func Empty(val Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.Empty(val.Val(row))
 	}
 }
 
-func NotEmpty(val []byte) FilterFunc {
-	return func() bool {
-		return util.NotEmpty(val)
+func NotEmpty(val Parameter) FilterFunc {
+	return func(row *store.Row) bool {
+		return util.NotEmpty(val.Val(row))
 	}
 }
 
-func HasPrefix(s, prefix []byte) FilterFunc {
-	return func() bool {
-		return bytes.HasPrefix(s, prefix)
+func HasPrefix(s Parameter, prefix []byte) FilterFunc {
+	return func(row *store.Row) bool {
+		return bytes.HasPrefix(s.Val(row), prefix)
 	}
 }
 
-func HasSuffix(s, suffix []byte) FilterFunc {
-	return func() bool {
-		return bytes.HasSuffix(s, suffix)
+func HasSuffix(s Parameter, suffix []byte) FilterFunc {
+	return func(row *store.Row) bool {
+		return bytes.HasSuffix(s.Val(row), suffix)
 	}
 }
