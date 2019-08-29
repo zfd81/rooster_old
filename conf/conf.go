@@ -5,8 +5,7 @@ import (
 )
 
 type Config struct {
-	Name string
-	Age  int `toml:"age"`
+	Path string `toml:"path"`
 }
 
 func (c *Config) Load(confFile string) error {
@@ -14,7 +13,9 @@ func (c *Config) Load(confFile string) error {
 	return err
 }
 
-var defaultConf = Config{"zfd", 33}
+var defaultConf = Config{
+	Path: "/tmp/rooster/meta",
+}
 
 var globalConf = defaultConf
 

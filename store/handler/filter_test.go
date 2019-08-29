@@ -1,15 +1,16 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/binary"
 	"github.com/zfd81/rooster/store"
 	"testing"
 	"unsafe"
 )
 
-var str string = "第一列,第一列,第三列,第四例,11,11,33,44,55"
+var str string = "第一列1w单独,第一列,第三列,第四例,54,11,33,44,55"
 
-var row *store.Row = store.NewRowByBytes([]byte(str), ',')
+var row *store.Line = store.NewRowByBytes([]byte(str), ',')
 
 func Int64ToBytes(i int64) []byte {
 	var buf = make([]byte, 8)
@@ -57,17 +58,15 @@ func TestEqual(t *testing.T) {
 //	t.Log(NotEqual(b5, b6)())
 //}
 //
-//func TestGreater(t *testing.T) {
-//	t.Log("==========比较字符串")
-//	t.Log(Greater(b1, b2)())
-//	t.Log(Greater(b1, b3)())
-//	t.Log(Greater(b3, b1)())
-//	t.Log("==========比较整数")
-//	t.Log(Greater(b4, b5)())
-//	t.Log(Greater(b4, b6)())
-//	t.Log(Greater(b5, b6)())
-//	t.Log(Greater(b6, b5)())
-//}
+func TestGreater(t *testing.T) {
+	t.Log("==========比较字符串")
+	//t.Log(Greater(b1, b2)())
+	t.Log("==========比较整数")
+	t.Log(Greater(NewConst(351), NewConst(35))(row))
+	rs := bytes.Runes(*row.GetField(0))
+	t.Log(len(rs))
+}
+
 //
 //func TestGreaterOrEqual(t *testing.T) {
 //	t.Log("==========比较字符串")

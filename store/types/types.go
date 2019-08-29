@@ -8,6 +8,7 @@ const (
 	String
 	Datetime
 	Timestamp
+	Bytes
 )
 
 type ParamType byte

@@ -10,10 +10,10 @@ const (
 	defaultFilterChainCapacity = 128
 )
 
-type FilterFunc func(row *store.Line) bool
+type FilterFunc func(line *store.Line) bool
 
-func (f *FilterFunc) Filter(row *store.Line) bool {
-	return (*f)(row)
+func (f *FilterFunc) Filter(line *store.Line) bool {
+	return (*f)(line)
 }
 
 type FilterChain []FilterFunc
@@ -37,9 +37,9 @@ func (fc *FilterChain) Clear() *FilterChain {
 	return fc
 }
 
-func (fc *FilterChain) Filter(row *store.Line) bool {
+func (fc *FilterChain) Filter(line *store.Line) bool {
 	for _, filter := range *fc {
-		if !filter(row) {
+		if !filter(line) {
 			return false
 		}
 	}
@@ -52,9 +52,9 @@ func NewFilterChain() *FilterChain {
 }
 
 func AND(filters ...FilterFunc) FilterFunc {
-	return func(row *store.Line) bool {
+	return func(line *store.Line) bool {
 		for _, v := range filters {
-			if !v(row) {
+			if !v(line) {
 				return false
 			}
 		}
@@ -63,9 +63,9 @@ func AND(filters ...FilterFunc) FilterFunc {
 }
 
 func OR(filters ...FilterFunc) FilterFunc {
-	return func(row *store.Line) bool {
+	return func(line *store.Line) bool {
 		for _, v := range filters {
-			if v(row) {
+			if v(line) {
 				return true
 			}
 		}
@@ -73,74 +73,74 @@ func OR(filters ...FilterFunc) FilterFunc {
 	}
 }
 
-func Equal(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.Equal(a.Val(row), b.Val(row))
+func Equal(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.Equal(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func NotEqual(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.NotEqual(a.Val(row), b.Val(row))
+func NotEqual(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.NotEqual(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func Greater(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.Greater(a.Val(row), b.Val(row))
+func Greater(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.Greater(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func GreaterOrEqual(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.GreaterOrEqual(a.Val(row), b.Val(row))
+func GreaterOrEqual(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.GreaterOrEqual(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func Less(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.Less(a.Val(row), b.Val(row))
+func Less(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.Less(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func LessOrEqual(a, b Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.LessOrEqual(a.Val(row), b.Val(row))
+func LessOrEqual(a, b Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.LessOrEqual(a.Bytes(line), b.Bytes(line))
 	}
 }
 
-func In(a Parameter, b [][]byte) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.In(a.Val(row), b)
+func In(a Expression, b [][]byte) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.In(a.Bytes(line), b)
 	}
 }
 
-func NotIn(a Parameter, b [][]byte) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.NotIn(a.Val(row), b)
+func NotIn(a Expression, b [][]byte) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.NotIn(a.Bytes(line), b)
 	}
 }
 
-func Empty(val Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.Empty(val.Val(row))
+func Empty(val Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.Empty(val.Bytes(line))
 	}
 }
 
-func NotEmpty(val Parameter) FilterFunc {
-	return func(row *store.Line) bool {
-		return util.NotEmpty(val.Val(row))
+func NotEmpty(val Expression) FilterFunc {
+	return func(line *store.Line) bool {
+		return util.NotEmpty(val.Bytes(line))
 	}
 }
 
-func HasPrefix(s Parameter, prefix []byte) FilterFunc {
-	return func(row *store.Line) bool {
-		return bytes.HasPrefix(s.Val(row), prefix)
+func HasPrefix(s Expression, prefix []byte) FilterFunc {
+	return func(line *store.Line) bool {
+		return bytes.HasPrefix(s.Bytes(line), prefix)
 	}
 }
 
-func HasSuffix(s Parameter, suffix []byte) FilterFunc {
-	return func(row *store.Line) bool {
-		return bytes.HasSuffix(s.Val(row), suffix)
+func HasSuffix(s Expression, suffix []byte) FilterFunc {
+	return func(line *store.Line) bool {
+		return bytes.HasSuffix(s.Bytes(line), suffix)
 	}
 }
