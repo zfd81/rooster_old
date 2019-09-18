@@ -2,6 +2,7 @@ package conf
 
 import (
 	"github.com/BurntSushi/toml"
+	"os/user"
 )
 
 type Config struct {
@@ -18,6 +19,11 @@ var defaultConf = Config{
 }
 
 var globalConf = defaultConf
+
+func init() {
+	user, _ := user.Current()
+	defaultConf.Path = user.HomeDir + "/rooster/meta"
+}
 
 func NewConfig() *Config {
 	conf := defaultConf

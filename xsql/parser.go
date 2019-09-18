@@ -3,7 +3,6 @@ package xsql
 import (
 	"bytes"
 	"fmt"
-	"github.com/zfd81/rooster"
 	"github.com/zfd81/rooster/util"
 )
 
@@ -40,10 +39,10 @@ func bindParams(sql string, arg Params) (string, []interface{}, error) {
 
 func insert(table string, arg Params) (string, []interface{}, error) {
 	if table == "" || arg == nil {
-		return "", nil, rooster.ErrParamNotNil
+		return "", nil, ErrParamNotNil
 	}
 	if arg.Size() < 1 {
-		return "", nil, rooster.ErrParamEmpty
+		return "", nil, ErrParamEmpty
 	}
 	var sql bytes.Buffer
 	var sql2 bytes.Buffer

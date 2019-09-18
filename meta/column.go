@@ -1,11 +1,15 @@
 package meta
 
 type Column struct {
-	Name         string
-	Text         string
-	Comment      string
-	dataType     string
-	length       int
-	DefaultValue string
-	State        SchemaState
+	Name         string      `json:"name"`
+	Text         string      `json:"text"`
+	Comment      string      `json:"comment,omitempty"`
+	DataType     string      `json:"dataType"`
+	Length       int         `json:"length,omitempty"`
+	DefaultValue interface{} `json:"defaultValue,omitempty"`
+	State        SchemaState `json:"state"`
+}
+
+func NewColumn(name string, dataType string) *Column {
+	return &Column{Name: name, DataType: dataType}
 }

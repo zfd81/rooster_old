@@ -1,4 +1,4 @@
-package rooster
+package xsql
 
 import "errors"
 
