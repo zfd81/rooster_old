@@ -1,9 +1,12 @@
 package meta
 
-import "os"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 const (
-	instanceFileName = "instance.m"
+	instanceFileName = "meta.ins"
 )
 
 type InstanceInfo struct {
@@ -14,32 +17,38 @@ type InstanceInfo struct {
 
 type Instance struct {
 	InstanceInfo
-	Databases []*Database `json:"-"`
+	Databases map[string]*Database `json:"-"`
 }
 
-//func CreateDatabase() *Database {
-//	return
-//}
-
-func NewInstance() *Instance {
-	return &Instance{}
+func (i *Instance) GetMName() string {
+	return fmt.Sprintf("%s%s", config.Meta.InstancePrefix, i.Name)
 }
 
-func ReadInstance(path string) *Instance {
-	filePath := path + "/" + instanceFileName
-	_, err := os.Stat(filePath)
-	if err != nil {
-		return nil
+func (i *Instance) GetPath() string {
+	return fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, i.GetMName())
+}
+
+func (i *Instance) CreateDatabase(name string) *Database {
+	db := &Database{
+		DatabaseInfo: DatabaseInfo{
+			Name: name,
+			Text: name,
+		},
+		Tables:   make(map[string]*Table),
+		Instance: i,
 	}
-	ins := NewInstance()
-	err = readFile(filePath, ins)
-	if err != nil {
-		return nil
-	}
-	return ins
+	i.Databases[name] = db
+	return db
 }
 
-func WriteInstance(path string, ins *Instance) error {
-	filePath := path + "/" + instanceFileName
-	return writeFile(filePath, ins)
+func (i *Instance) GetDatabase(name string) *Database {
+	return i.Databases[name]
+}
+
+func (i *Instance) Store() error {
+	return storeInstance(i)
+}
+
+func (i *Instance) Load(data []byte) error {
+	return json.Unmarshal(data, i)
 }

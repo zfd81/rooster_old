@@ -7,6 +7,21 @@ import (
 
 type Config struct {
 	Path string `toml:"path"`
+	Etcd Etcd   `toml:"etcd"`
+	Meta Meta   `toml:"meta"`
+}
+
+type Etcd struct {
+	Endpoints      []string `toml:"endpoints"`
+	DialTimeout    int      `toml:"dial-timeout"`
+	RequestTimeout int      `toml:"request-timeout"`
+}
+
+type Meta struct {
+	InstancePrefix string `toml:"instance-prefix"`
+	DatabasePrefix string `toml:"database-prefix"`
+	TablePrefix    string `toml:"table-prefix"`
+	Root           string `toml:"root"`
 }
 
 func (c *Config) Load(confFile string) error {
@@ -15,7 +30,18 @@ func (c *Config) Load(confFile string) error {
 }
 
 var defaultConf = Config{
-	Path: "/tmp/rooster/meta",
+	Path: "/rooster/meta",
+	Etcd: Etcd{
+		Endpoints:      []string{"127.0.0.1:2379"},
+		DialTimeout:    5,
+		RequestTimeout: 5,
+	},
+	Meta: Meta{
+		InstancePrefix: "ins_",
+		DatabasePrefix: "db_",
+		TablePrefix:    "tbl_",
+		Root:           "/rooster/meta",
+	},
 }
 
 var globalConf = defaultConf
