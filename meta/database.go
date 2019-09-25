@@ -19,7 +19,7 @@ type Database struct {
 }
 
 func (d *Database) GetMName() string {
-	return fmt.Sprintf("%s%s", config.Meta.DatabasePrefix, d.Name)
+	return fmt.Sprintf("%s%s", d.Name, config.Meta.DatabaseSuffix)
 }
 
 func (d *Database) GetPath() string {
@@ -28,12 +28,23 @@ func (d *Database) GetPath() string {
 
 func (d *Database) CreateTable(name string) *Table {
 	tbl := &Table{
-		Name:     name,
-		Text:     name,
-		Columns:  make([]*Column, 0, 10),
+		TableInfo: TableInfo{
+			Name:    name,
+			Text:    name,
+			Columns: make([]*Column, 0, 10),
+		},
 		Database: d,
 	}
 	d.Tables[name] = tbl
+	return tbl
+}
+
+func (d *Database) CreateTableWithInfo(info TableInfo) *Table {
+	tbl := &Table{
+		TableInfo: info,
+		Database:  d,
+	}
+	d.Tables[info.Name] = tbl
 	return tbl
 }
 

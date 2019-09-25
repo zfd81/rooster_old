@@ -41,11 +41,15 @@ func Put(key, value string) (revision int64, err error) {
 	return resp.Header.Revision, nil
 }
 
-//func PutWithLease(key, value string, leaseID clientv3.LeaseID) error {
-//	_, err := kv.Put(context.TODO(), key, value, clientv3.WithLease(leaseID))
-//
-//	return err
-//}
+func Del(key, value string) (revision int64, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Etcd.RequestTimeout)*time.Second)
+	resp, err := client.Delete(ctx, key, clientv3.WithPrefix())
+	cancel()
+	if err != nil {
+		return -1, err
+	}
+	return resp.Header.Revision, nil
+}
 
 func Get(key string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Etcd.RequestTimeout)*time.Second)

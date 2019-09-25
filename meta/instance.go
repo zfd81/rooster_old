@@ -21,7 +21,7 @@ type Instance struct {
 }
 
 func (i *Instance) GetMName() string {
-	return fmt.Sprintf("%s%s", config.Meta.InstancePrefix, i.Name)
+	return fmt.Sprintf("%s%s", i.Name, config.Meta.InstanceSuffix)
 }
 
 func (i *Instance) GetPath() string {
@@ -38,6 +38,16 @@ func (i *Instance) CreateDatabase(name string) *Database {
 		Instance: i,
 	}
 	i.Databases[name] = db
+	return db
+}
+
+func (i *Instance) CreateDatabaseWithInfo(info DatabaseInfo) *Database {
+	db := &Database{
+		DatabaseInfo: info,
+		Tables:       make(map[string]*Table),
+		Instance:     i,
+	}
+	i.Databases[info.Name] = db
 	return db
 }
 

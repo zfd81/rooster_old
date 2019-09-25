@@ -5,18 +5,22 @@ import (
 	"fmt"
 )
 
+type TableInfo struct {
+	Name    string      `json:"name"`
+	Text    string      `json:"text,omitempty"`
+	Comment string      `json:"comment,omitempty"`
+	Charset string      `json:"charset"`
+	State   SchemaState `json:"state"`
+	Columns []*Column   `json:"cols"`
+}
+
 type Table struct {
-	Name     string      `json:"name"`
-	Text     string      `json:"text,omitempty"`
-	Comment  string      `json:"comment,omitempty"`
-	Charset  string      `json:"charset"`
-	State    SchemaState `json:"state"`
-	Columns  []*Column   `json:"cols"`
-	Database *Database   `json:"-"`
+	TableInfo
+	Database *Database `json:"-"`
 }
 
 func (t *Table) GetMName() string {
-	return fmt.Sprintf("%s%s", config.Meta.TablePrefix, t.Name)
+	return fmt.Sprintf("%s%s", t.Name, config.Meta.TableSuffix)
 }
 
 func (t *Table) GetPath() string {

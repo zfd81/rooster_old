@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
+type Meta map[string]*Instance
 type SchemaState byte
+
+type EventType int32
 
 const (
 	// StateNone means this schema element is absent and can't be used.
@@ -25,12 +28,16 @@ const (
 	// StatePublic means this schema element is ok for all write and read operations.
 	StatePublic
 
+	CREATE EventType = 0
+	MODIFY EventType = 1
+	REMOVE EventType = 2
+
 	Separator = "/" // 路径分隔符（分隔路径元素）
 	MetaPerm  = 0666
 )
 
 var (
-	meta   = make(map[string]*Instance)
+	meta   = make(Meta)
 	config = conf.NewConfig()
 )
 
@@ -51,13 +58,29 @@ func (s SchemaState) String() string {
 	}
 }
 
-func getMetaName(path string) string {
-	index := strings.LastIndex(path, Separator)
-	return path[index+1:]
+func parsePath(path string) (iname string, dname string, tname string, suffix string) {
+	strs := strings.Split(path[len(config.Meta.Root)+1:], "/")
+	length := len(strs)
+	if length == 3 {
+		iname, _ = parseName(strs[0])
+		dname, _ = parseName(strs[1])
+		tname, suffix = parseName(strs[2])
+	} else if length == 2 {
+		iname, _ = parseName(strs[0])
+		dname, suffix = parseName(strs[1])
+	} else if length == 1 {
+		iname, suffix = parseName(strs[0])
+	}
+	return
 }
-func getName(mname string) string {
-	index := strings.Index(mname, "_")
-	return mname[index+1:]
+
+func parseName(mname string) (name string, suffix string) {
+	index := strings.Index(mname, ".")
+	return mname[:index], mname[index:]
+}
+
+func GetMeta() Meta {
+	return meta
 }
 
 func CreateInstance(name string) *Instance {
@@ -69,6 +92,15 @@ func CreateInstance(name string) *Instance {
 		Databases: make(map[string]*Database),
 	}
 	meta[name] = ins
+	return ins
+}
+
+func CreateInstanceWithInfo(info InstanceInfo) *Instance {
+	ins := &Instance{
+		InstanceInfo: info,
+		Databases:    make(map[string]*Database),
+	}
+	meta[info.Name] = ins
 	return ins
 }
 
@@ -90,39 +122,63 @@ func LoadInstance(name string) error {
 	return err
 }
 
+func init() {
+	LoadMeta()
+}
+
 func LoadMeta() error {
-	insKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, config.Meta.InstancePrefix))
+	kvs, err := etcd.GetWithPrefix(config.Meta.Root)
 	if err == nil {
-		for _, insKv := range insKvs {
-			ins := CreateInstance(getName(getMetaName(string(insKv.Key))))
-			err = ins.Load(insKv.Value)
-			if err == nil {
-				dbKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", ins.GetPath(), Separator, config.Meta.DatabasePrefix))
-				if err != nil {
-					return err
-				}
-				for _, dbKv := range dbKvs {
-					db := ins.CreateDatabase(getName(getMetaName(string(dbKv.Key))))
-					err = db.Load(dbKv.Value)
-					if err == nil {
-						tblKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", db.GetPath(), Separator, config.Meta.TablePrefix))
-						if err != nil {
-							return err
-						}
-						for _, tblKv := range tblKvs {
-							tbl := db.CreateTable(getName(getMetaName(string(tblKv.Key))))
-							err = tbl.Load(tblKv.Value)
-							if err != nil {
-								return err
-							}
-						}
-					}
-				}
+		for _, kv := range kvs {
+			iname, dname, tname, suffix := parsePath(string(kv.Key))
+			if suffix == config.Meta.TableSuffix {
+				tbl := meta[iname].GetDatabase(dname).CreateTable(tname)
+				err = tbl.Load(kv.Value)
+			} else if suffix == config.Meta.DatabaseSuffix {
+				db := meta[iname].CreateDatabase(dname)
+				err = db.Load(kv.Value)
+			} else if suffix == config.Meta.InstanceSuffix {
+				ins := CreateInstance(iname)
+				err = ins.Load(kv.Value)
 			}
 		}
 	}
 	return err
 }
+
+//func LoadMeta() error {
+//	insKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, config.Meta.InstancePrefix))
+//	if err == nil {
+//		for _, insKv := range insKvs {
+//			ins := CreateInstance(getName(getMetaName(string(insKv.Key))))
+//			err = ins.Load(insKv.Value)
+//			if err == nil {
+//				dbKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", ins.GetPath(), Separator, config.Meta.DatabasePrefix))
+//				if err != nil {
+//					return err
+//				}
+//				for _, dbKv := range dbKvs {
+//					db := ins.CreateDatabase(getName(getMetaName(string(dbKv.Key))))
+//					err = db.Load(dbKv.Value)
+//					if err == nil {
+//						tblKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", db.GetPath(), Separator, config.Meta.TablePrefix))
+//						if err != nil {
+//							return err
+//						}
+//						for _, tblKv := range tblKvs {
+//							tbl := db.CreateTable(getName(getMetaName(string(tblKv.Key))))
+//							err = tbl.Load(tblKv.Value)
+//							if err != nil {
+//								return err
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+//	return err
+//}
 
 func storeInstance(ins *Instance) error {
 	data, err := json.Marshal(ins)

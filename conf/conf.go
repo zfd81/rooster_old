@@ -7,8 +7,13 @@ import (
 
 type Config struct {
 	Path string `toml:"path"`
+	Http Http   `toml:"http"`
 	Etcd Etcd   `toml:"etcd"`
 	Meta Meta   `toml:"meta"`
+}
+
+type Http struct {
+	Port int `toml:"port"`
 }
 
 type Etcd struct {
@@ -18,9 +23,9 @@ type Etcd struct {
 }
 
 type Meta struct {
-	InstancePrefix string `toml:"instance-prefix"`
-	DatabasePrefix string `toml:"database-prefix"`
-	TablePrefix    string `toml:"table-prefix"`
+	InstanceSuffix string `toml:"instance-suffix"`
+	DatabaseSuffix string `toml:"database-suffix"`
+	TableSuffix    string `toml:"table-suffix"`
 	Root           string `toml:"root"`
 }
 
@@ -31,15 +36,18 @@ func (c *Config) Load(confFile string) error {
 
 var defaultConf = Config{
 	Path: "/rooster/meta",
+	Http: Http{
+		Port: 8143,
+	},
 	Etcd: Etcd{
 		Endpoints:      []string{"127.0.0.1:2379"},
 		DialTimeout:    5,
 		RequestTimeout: 5,
 	},
 	Meta: Meta{
-		InstancePrefix: "ins_",
-		DatabasePrefix: "db_",
-		TablePrefix:    "tbl_",
+		InstanceSuffix: ".ins",
+		DatabaseSuffix: ".db",
+		TableSuffix:    ".tbl",
 		Root:           "/rooster/meta",
 	},
 }
