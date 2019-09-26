@@ -20,10 +20,11 @@ func Start() error {
 		ddl.POST("/ins/:iname/db", CreateDatabase)      //创建数据库
 		ddl.PUT("/ins/:iname/db/:dname", AlterDatabase) //修改数据库
 
-		ddl.GET("/ins/:iname/db/:dname/tbl", ListTable)         //查看数据库下的所有数据表
-		ddl.GET("/ins/:iname/db/:dname/tbl/:tname", FindTable)  //查看数据表信息
-		ddl.POST("/ins/:iname/db/:dname/tbl", CreateTable)      //创建数据表
-		ddl.PUT("/ins/:iname/db/:dname/tbl/:tname", AlterTable) //修改数据表
+		ddl.GET("/ins/:iname/db/:dname/tbl", ListTable)           //查看数据库下的所有数据表
+		ddl.GET("/ins/:iname/db/:dname/tbl/:tname", FindTable)    //查看数据表信息
+		ddl.POST("/ins/:iname/db/:dname/tbl", CreateTable)        //创建数据表
+		ddl.PUT("/ins/:iname/db/:dname/tbl/:tname", AlterTable)   //修改数据表
+		ddl.DELETE("/ins/:iname/db/:dname/tbl/:tname", DropTable) //删除数据表
 	}
 	return router.Run(":" + strconv.Itoa(conf.GetGlobalConfig().Http.Port))
 }

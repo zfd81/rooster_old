@@ -198,7 +198,7 @@ func CreateTable(c *gin.Context) {
 	}
 	tbl = db.CreateTableWithInfo(tblInfo)
 	tbl.Store()
-	c.JSON(http.StatusOK, db)
+	c.JSON(http.StatusOK, tbl)
 }
 
 func AlterTable(c *gin.Context) {
@@ -228,5 +228,26 @@ func AlterTable(c *gin.Context) {
 	tblInfo.Name = tname
 	tbl.TableInfo = tblInfo
 	tbl.Store()
+	c.JSON(http.StatusOK, tbl)
+}
+
+func DropTable(c *gin.Context) {
+	iname := c.Param("iname")
+	ins := meta.GetMeta()[iname]
+	if ins == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrInsNotFound.Error()})
+		return
+	}
+	dname := c.Param("dname")
+	db := ins.GetDatabase(dname)
+	if db == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrDBNotFound.Error()})
+		return
+	}
+	tname := c.Param("tname")
+	tbl := db.GetTable(tname)
+	if tbl != nil {
+		db.RemoveTable(tname)
+	}
 	c.JSON(http.StatusOK, tbl)
 }

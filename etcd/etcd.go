@@ -41,7 +41,17 @@ func Put(key, value string) (revision int64, err error) {
 	return resp.Header.Revision, nil
 }
 
-func Del(key, value string) (revision int64, err error) {
+func Del(key string) (revision int64, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Etcd.RequestTimeout)*time.Second)
+	resp, err := client.Delete(ctx, key)
+	cancel()
+	if err != nil {
+		return -1, err
+	}
+	return resp.Header.Revision, nil
+}
+
+func DelWithPrefix(key string) (revision int64, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(config.Etcd.RequestTimeout)*time.Second)
 	resp, err := client.Delete(ctx, key, clientv3.WithPrefix())
 	cancel()

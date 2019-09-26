@@ -49,7 +49,13 @@ func (d *Database) CreateTableWithInfo(info TableInfo) *Table {
 }
 
 func (d *Database) RemoveTable(name string) *Database {
-	delete(d.Tables, name)
+	tbl := d.Tables[name]
+	if tbl != nil {
+		err := RemoveTable(tbl)
+		if err == nil {
+			delete(d.Tables, name)
+		}
+	}
 	return d
 }
 

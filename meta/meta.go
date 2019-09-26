@@ -209,3 +209,8 @@ func storeTable(tbl *Table) error {
 	_, err = etcd.Put(path, string(data))
 	return err
 }
+
+func RemoveTable(tbl *Table) error {
+	_, err := etcd.Del(tbl.GetPath())
+	return err
+}
