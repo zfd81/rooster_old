@@ -2,7 +2,9 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/zfd81/rooster/conf"
 	"github.com/zfd81/rooster/meta"
 	"net/http"
 )
@@ -245,9 +247,11 @@ func DropTable(c *gin.Context) {
 		return
 	}
 	tname := c.Param("tname")
-	tbl := db.GetTable(tname)
-	if tbl != nil {
+	err := meta.Remove(fmt.Sprintf("%s%s%s%s", db.GetPath(), meta.Separator, tname, conf.GetGlobalConfig().Meta.TableSuffix))
+	if err == nil {
 		db.RemoveTable(tname)
+		c.JSON(http.StatusOK, gin.H{"msg": 1})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": ErrTblNotFound.Error()})
 	}
-	c.JSON(http.StatusOK, tbl)
 }

@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+type OperType int
+
+//operType操作类型:0 create,1 delete,2 modify
+type WatcherFunc func(operType OperType, key []byte, value []byte, createRevision int64, modRevision int64, version int64)
+
+const (
+	CREATE OperType = 0
+	DELETE OperType = 1
+	MODIFY OperType = 2
+)
+
 var (
 	config = conf.NewConfig()
 	ctx    = context.TODO()
@@ -82,6 +93,24 @@ func GetWithPrefix(prefix string) ([]*mvccpb.KeyValue, error) {
 		return nil, err
 	}
 	return resp.Kvs, nil
+}
+
+func WatchWithPrefix(key string, watcher WatcherFunc) {
+	rch := client.Watch(context.Background(), key, clientv3.WithPrefix())
+	go func() {
+		for wresp := range rch {
+			for _, ev := range wresp.Events {
+				oper := CREATE
+				version := ev.Kv.Version
+				if ev.Type == mvccpb.DELETE {
+					oper = DELETE
+				} else if version > 1 {
+					oper = MODIFY
+				}
+				watcher(oper, ev.Kv.Key, ev.Kv.Value, ev.Kv.CreateRevision, ev.Kv.ModRevision, version)
+			}
+		}
+	}()
 }
 
 //func Grant(ttl int64) error {

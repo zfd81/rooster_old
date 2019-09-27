@@ -75,7 +75,7 @@ func parsePath(path string) (iname string, dname string, tname string, suffix st
 }
 
 func parseName(mname string) (name string, suffix string) {
-	index := strings.Index(mname, ".")
+	index := strings.LastIndex(mname, ".")
 	return mname[:index], mname[index:]
 }
 
@@ -122,7 +122,53 @@ func LoadInstance(name string) error {
 	return err
 }
 
+func metaWatcher(operType etcd.OperType, key []byte, value []byte, createRevision int64, modRevision int64, version int64) {
+	iname, dname, tname, suffix := parsePath(string(key))
+	if operType == etcd.CREATE {
+		switch suffix {
+		case config.Meta.TableSuffix:
+			tbl := meta[iname].GetDatabase(dname).CreateTable(tname)
+			tbl.Load(value)
+			break
+		case config.Meta.DatabaseSuffix:
+			db := meta[iname].CreateDatabase(dname)
+			db.Load(value)
+			break
+		case config.Meta.InstanceSuffix:
+			ins := CreateInstance(iname)
+			ins.Load(value)
+			break
+		}
+	} else if operType == etcd.MODIFY {
+		switch suffix {
+		case config.Meta.TableSuffix:
+			tbl := meta[iname].GetDatabase(dname).GetTable(tname)
+			tbl.Load(value)
+			break
+		case config.Meta.DatabaseSuffix:
+			db := meta[iname].GetDatabase(dname)
+			db.Load(value)
+			break
+		case config.Meta.InstanceSuffix:
+			ins := meta[iname]
+			ins.Load(value)
+			break
+		}
+	} else if operType == etcd.DELETE {
+		switch suffix {
+		case config.Meta.TableSuffix:
+			db := meta[iname].GetDatabase(dname)
+			db.RemoveTable(tname)
+			break
+		case config.Meta.DatabaseSuffix:
+			break
+		case config.Meta.InstanceSuffix:
+			break
+		}
+	}
+}
 func init() {
+	etcd.WatchWithPrefix(config.Meta.Root, metaWatcher)
 	LoadMeta()
 }
 
@@ -210,7 +256,7 @@ func storeTable(tbl *Table) error {
 	return err
 }
 
-func RemoveTable(tbl *Table) error {
-	_, err := etcd.Del(tbl.GetPath())
-	return err
+func Remove(path string) (err error) {
+	_, err = etcd.Del(path)
+	return
 }
