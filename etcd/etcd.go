@@ -95,6 +95,24 @@ func GetWithPrefix(prefix string) ([]*mvccpb.KeyValue, error) {
 	return resp.Kvs, nil
 }
 
+func Watch(key string, watcher WatcherFunc) {
+	rch := client.Watch(context.Background(), key)
+	go func() {
+		for wresp := range rch {
+			for _, ev := range wresp.Events {
+				oper := CREATE
+				version := ev.Kv.Version
+				if ev.Type == mvccpb.DELETE {
+					oper = DELETE
+				} else if version > 1 {
+					oper = MODIFY
+				}
+				watcher(oper, ev.Kv.Key, ev.Kv.Value, ev.Kv.CreateRevision, ev.Kv.ModRevision, version)
+			}
+		}
+	}()
+}
+
 func WatchWithPrefix(key string, watcher WatcherFunc) {
 	rch := client.Watch(context.Background(), key, clientv3.WithPrefix())
 	go func() {
