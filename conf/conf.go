@@ -6,10 +6,13 @@ import (
 )
 
 type Config struct {
-	Path string `toml:"path"`
-	Http Http   `toml:"http"`
-	Etcd Etcd   `toml:"etcd"`
-	Meta Meta   `toml:"meta"`
+	Name    string  `toml:"name"`
+	Version string  `toml:"version"`
+	Path    string  `toml:"path"`
+	Http    Http    `toml:"http"`
+	Etcd    Etcd    `toml:"etcd"`
+	Meta    Meta    `toml:"meta"`
+	Cluster Cluster `toml:"cluster"`
 }
 
 type Http struct {
@@ -29,13 +32,21 @@ type Meta struct {
 	Root           string `toml:"root"`
 }
 
+type Cluster struct {
+	Root                     string `toml:"root"`
+	HeartbeatInterval        int64  `toml:"heartbeat-interval"`
+	HeartbeatRecheckInterval int64  `toml:"heartbeat-recheck-interval"`
+}
+
 func (c *Config) Load(confFile string) error {
 	_, err := toml.DecodeFile(confFile, c)
 	return err
 }
 
 var defaultConf = Config{
-	Path: "/rooster/meta",
+	Name:    "Rooster",
+	Version: "1.0.0",
+	Path:    "/rooster/meta",
 	Http: Http{
 		Port: 8143,
 	},
@@ -50,13 +61,17 @@ var defaultConf = Config{
 		TableSuffix:    ".tbl",
 		Root:           "/rooster/meta",
 	},
+	Cluster: Cluster{
+		Root:              "/rooster/cluster",
+		HeartbeatInterval: 9, //5秒
+	},
 }
 
 var globalConf = defaultConf
 
 func init() {
 	user, _ := user.Current()
-	defaultConf.Path = user.HomeDir + "/rooster/meta"
+	defaultConf.Path = user.HomeDir + "/rooster"
 }
 
 func NewConfig() *Config {

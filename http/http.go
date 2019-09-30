@@ -26,5 +26,9 @@ func Start() error {
 		ddl.PUT("/ins/:iname/db/:dname/tbl/:tname", AlterTable)   //修改数据表
 		ddl.DELETE("/ins/:iname/db/:dname/tbl/:tname", DropTable) //删除数据表
 	}
+	cluster := router.Group("/cluster")
+	{
+		cluster.GET("/", ListClusterNode)
+	}
 	return router.Run(":" + strconv.Itoa(conf.GetGlobalConfig().Http.Port))
 }

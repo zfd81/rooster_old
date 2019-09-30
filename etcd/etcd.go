@@ -21,9 +21,7 @@ const (
 
 var (
 	config = conf.NewConfig()
-	ctx    = context.TODO()
 	client *clientv3.Client
-	lease  clientv3.Lease
 )
 
 func init() {
@@ -35,7 +33,6 @@ func init() {
 
 	}
 	client = cli
-	lease = clientv3.NewLease(cli)
 }
 
 func GetClient() *clientv3.Client {
@@ -130,11 +127,3 @@ func WatchWithPrefix(key string, watcher WatcherFunc) {
 		}
 	}()
 }
-
-//func Grant(ttl int64) error {
-//	//设置租约时间
-//	resp, err := lease.Grant(context.TODO(), ttl)
-//	if err != nil {
-//		return err
-//	}
-//}
