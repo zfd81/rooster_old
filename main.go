@@ -54,6 +54,7 @@ func main() {
 		node.StartUpTime = time.Now().Unix()
 		cluster.Register()
 		http.Start()
+		fmt.Println("ok")
 	}
 
 }
