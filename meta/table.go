@@ -63,9 +63,9 @@ func (t *Table) ModifyColumn(col *Column) *Table {
 }
 
 func (t *Table) GetColumnIndex(name string) int {
-	for i, v := range t.Columns {
+	for _, v := range t.Columns {
 		if v.Name == name {
-			return i
+			return v.Index
 		}
 	}
 	return -1
@@ -86,8 +86,5 @@ func (t *Table) Store() error {
 
 func (t *Table) Load(data []byte) error {
 	err := json.Unmarshal(data, t)
-	if err == nil {
-		t.Database.Tables[t.Name] = t
-	}
 	return err
 }
