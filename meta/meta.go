@@ -10,7 +10,6 @@ import (
 
 type Meta map[string]*Instance
 type SchemaState byte
-
 type EventType int32
 
 const (
@@ -33,7 +32,6 @@ const (
 	REMOVE EventType = 2
 
 	Separator = "/" // 路径分隔符（分隔路径元素）
-	MetaPerm  = 0666
 )
 
 var (
@@ -186,6 +184,9 @@ func LoadMeta() error {
 			} else if suffix == config.Meta.InstanceSuffix {
 				ins := CreateInstance(iname)
 				err = ins.Load(kv.Value)
+			}
+			if err != nil {
+				break
 			}
 		}
 	}
