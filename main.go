@@ -6,6 +6,7 @@ import (
 	"github.com/zfd81/rooster/cluster"
 	"github.com/zfd81/rooster/conf"
 	"github.com/zfd81/rooster/http"
+	"github.com/zfd81/rooster/meta"
 	"os"
 	"time"
 )
@@ -48,6 +49,10 @@ func main() {
 		if hport != -1 {
 			config.Http.Port = hport
 		}
+
+		meta.WatchMeta() //监测元数据
+		meta.LoadMeta()  //加载元数据
+
 		node := cluster.GetNode()
 		node.Address = "127.0.0.1"
 		node.Port = config.Http.Port
