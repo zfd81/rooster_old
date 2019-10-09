@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	instanceFileName = "meta.ins"
-)
-
 type InstanceInfo struct {
 	Name    string `json:"name"`
 	Text    string `json:"text"`

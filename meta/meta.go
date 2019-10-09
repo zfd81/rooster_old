@@ -10,7 +10,6 @@ import (
 
 type Meta map[string]*Instance
 type SchemaState byte
-
 type EventType int32
 
 const (
@@ -33,7 +32,6 @@ const (
 	REMOVE EventType = 2
 
 	Separator = "/" // 路径分隔符（分隔路径元素）
-	MetaPerm  = 0666
 )
 
 var (
@@ -167,9 +165,9 @@ func metaWatcher(operType etcd.OperType, key []byte, value []byte, createRevisio
 		}
 	}
 }
-func init() {
+
+func WatchMeta() {
 	etcd.WatchWithPrefix(config.Meta.Root, metaWatcher)
-	LoadMeta()
 }
 
 func LoadMeta() error {
@@ -187,44 +185,13 @@ func LoadMeta() error {
 				ins := CreateInstance(iname)
 				err = ins.Load(kv.Value)
 			}
+			if err != nil {
+				break
+			}
 		}
 	}
 	return err
 }
-
-//func LoadMeta() error {
-//	insKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, config.Meta.InstancePrefix))
-//	if err == nil {
-//		for _, insKv := range insKvs {
-//			ins := CreateInstance(getName(getMetaName(string(insKv.Key))))
-//			err = ins.Load(insKv.Value)
-//			if err == nil {
-//				dbKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", ins.GetPath(), Separator, config.Meta.DatabasePrefix))
-//				if err != nil {
-//					return err
-//				}
-//				for _, dbKv := range dbKvs {
-//					db := ins.CreateDatabase(getName(getMetaName(string(dbKv.Key))))
-//					err = db.Load(dbKv.Value)
-//					if err == nil {
-//						tblKvs, err := etcd.GetWithPrefix(fmt.Sprintf("%s%s%s", db.GetPath(), Separator, config.Meta.TablePrefix))
-//						if err != nil {
-//							return err
-//						}
-//						for _, tblKv := range tblKvs {
-//							tbl := db.CreateTable(getName(getMetaName(string(tblKv.Key))))
-//							err = tbl.Load(tblKv.Value)
-//							if err != nil {
-//								return err
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-//	return err
-//}
 
 func storeInstance(ins *Instance) error {
 	data, err := json.Marshal(ins)

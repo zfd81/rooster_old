@@ -66,8 +66,5 @@ func (d *Database) Store() error {
 
 func (d *Database) Load(data []byte) error {
 	err := json.Unmarshal(data, d)
-	if err == nil {
-		d.Instance.Databases[d.Name] = d
-	}
 	return err
 }
