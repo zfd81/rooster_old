@@ -53,12 +53,9 @@ func main() {
 		meta.WatchMeta() //监测元数据
 		meta.LoadMeta()  //加载元数据
 
-		node := cluster.GetNode()
-		node.Address = "127.0.0.1"
-		node.Port = config.Http.Port
-		node.StartUpTime = time.Now().Unix()
-		cluster.Register()
-		http.Start()
+		cluster.Register(time.Now().Unix()) //集群注册
+
+		http.Start() //启动服务
 	}
 
 }
