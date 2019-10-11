@@ -22,8 +22,12 @@ func (d *Database) GetMName() string {
 	return fmt.Sprintf("%s%s", d.Name, config.Meta.DatabaseSuffix)
 }
 
+func (d *Database) GetFullName() string {
+	return fmt.Sprintf("%s%s%s", d.Instance.Name, NameSeparator, d.Name)
+}
+
 func (d *Database) GetPath() string {
-	return fmt.Sprintf("%s%s%s", d.Instance.GetPath(), Separator, d.GetMName())
+	return fmt.Sprintf("%s%s%s", d.Instance.GetPath(), PathSeparator, d.GetMName())
 }
 
 func (d *Database) CreateTable(name string) *Table {

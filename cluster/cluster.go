@@ -92,7 +92,7 @@ func Register(startUpTime int64) error {
 	if err != nil {
 		return err
 	}
-	path = fmt.Sprintf("%s%s%s:%s", path, meta.Separator, node.Address, strconv.Itoa(node.Port))
+	path = fmt.Sprintf("%s%s%s:%s", path, meta.PathSeparator, node.Address, strconv.Itoa(node.Port))
 
 	_, err = cli.Put(context.TODO(), path, string(data), clientv3.WithLease(leaseID))
 	return err

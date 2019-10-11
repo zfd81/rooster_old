@@ -13,6 +13,7 @@ type Config struct {
 	Etcd    Etcd    `toml:"etcd"`
 	Meta    Meta    `toml:"meta"`
 	Cluster Cluster `toml:"cluster"`
+	Data    Data    `toml:"data"`
 }
 
 type Http struct {
@@ -36,6 +37,11 @@ type Cluster struct {
 	Root                     string `toml:"root"`
 	HeartbeatInterval        int64  `toml:"heartbeat-interval"`
 	HeartbeatRecheckInterval int64  `toml:"heartbeat-recheck-interval"`
+}
+
+type Data struct {
+	BlockSize   int `toml:"block-size"`  //数据块大小，以行为单位
+	Replication int `toml:"replication"` //数据块副本数量
 }
 
 func (c *Config) Load(confFile string) error {
@@ -64,6 +70,10 @@ var defaultConf = Config{
 	Cluster: Cluster{
 		Root:              "/rooster/cluster",
 		HeartbeatInterval: 9, //5秒
+	},
+	Data: Data{
+		BlockSize:   100000,
+		Replication: 3,
 	},
 }
 

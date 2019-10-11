@@ -31,7 +31,8 @@ const (
 	MODIFY EventType = 1
 	REMOVE EventType = 2
 
-	Separator = "/" // 路径分隔符（分隔路径元素）
+	PathSeparator = "/" // 路径分隔符（分隔路径元素）
+	NameSeparator = "." // 名字分隔符（分隔对象全名）
 )
 
 var (
@@ -109,7 +110,7 @@ func FindInstance(name string) *Instance {
 func LoadInstance(name string) error {
 	ins := &Instance{}
 	ins.Name = name
-	path := fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, ins.GetMName())
+	path := fmt.Sprintf("%s%s%s", config.Meta.Root, PathSeparator, ins.GetMName())
 	data, err := etcd.Get(path)
 	if data != nil {
 		err = json.Unmarshal(data, ins)
@@ -198,7 +199,7 @@ func storeInstance(ins *Instance) error {
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, ins.GetMName())
+	path := fmt.Sprintf("%s%s%s", config.Meta.Root, PathSeparator, ins.GetMName())
 	_, err = etcd.Put(path, string(data))
 	return err
 }
@@ -208,7 +209,7 @@ func storeDatabase(db *Database) error {
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("%s%s%s", db.Instance.GetPath(), Separator, db.GetMName())
+	path := fmt.Sprintf("%s%s%s", db.Instance.GetPath(), PathSeparator, db.GetMName())
 	_, err = etcd.Put(path, string(data))
 	return err
 }
@@ -218,7 +219,7 @@ func storeTable(tbl *Table) error {
 	if err != nil {
 		return err
 	}
-	path := fmt.Sprintf("%s%s%s", tbl.Database.GetPath(), Separator, tbl.GetMName())
+	path := fmt.Sprintf("%s%s%s", tbl.Database.GetPath(), PathSeparator, tbl.GetMName())
 	_, err = etcd.Put(path, string(data))
 	return err
 }

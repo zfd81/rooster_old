@@ -49,13 +49,10 @@ func main() {
 		if hport != -1 {
 			config.Http.Port = hport
 		}
-
-		meta.WatchMeta() //监测元数据
-		meta.LoadMeta()  //加载元数据
-
+		meta.WatchMeta()                    //监测元数据
+		meta.LoadMeta()                     //加载元数据
 		cluster.Register(time.Now().Unix()) //集群注册
-
-		http.Start() //启动服务
+		http.Start()                        //启动服务
 	}
 
 }

@@ -247,7 +247,7 @@ func DropTable(c *gin.Context) {
 		return
 	}
 	tname := c.Param("tname")
-	err := meta.Remove(fmt.Sprintf("%s%s%s%s", db.GetPath(), meta.Separator, tname, conf.GetGlobalConfig().Meta.TableSuffix))
+	err := meta.Remove(fmt.Sprintf("%s%s%s%s", db.GetPath(), meta.PathSeparator, tname, conf.GetGlobalConfig().Meta.TableSuffix))
 	if err == nil {
 		db.RemoveTable(tname)
 		c.JSON(http.StatusOK, gin.H{"msg": 1})

@@ -23,8 +23,12 @@ func (t *Table) GetMName() string {
 	return fmt.Sprintf("%s%s", t.Name, config.Meta.TableSuffix)
 }
 
+func (t *Table) GetFullName() string {
+	return fmt.Sprintf("%s%s%s", t.Database.GetFullName(), NameSeparator, t.Name)
+}
+
 func (t *Table) GetPath() string {
-	return fmt.Sprintf("%s%s%s", t.Database.GetPath(), Separator, t.GetMName())
+	return fmt.Sprintf("%s%s%s", t.Database.GetPath(), PathSeparator, t.GetMName())
 }
 
 func (t *Table) CreateColumn(name string, dataType string) *Column {

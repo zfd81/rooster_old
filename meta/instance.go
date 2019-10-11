@@ -21,7 +21,7 @@ func (i *Instance) GetMName() string {
 }
 
 func (i *Instance) GetPath() string {
-	return fmt.Sprintf("%s%s%s", config.Meta.Root, Separator, i.GetMName())
+	return fmt.Sprintf("%s%s%s", config.Meta.Root, PathSeparator, i.GetMName())
 }
 
 func (i *Instance) CreateDatabase(name string) *Database {
